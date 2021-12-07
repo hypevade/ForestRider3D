@@ -15,36 +15,49 @@ public class TouchScript : MonoBehaviour
     public Animator PausePanelAnim;
 
     public Text Count;
-    public Text CountShdow;
     public Text CountScoreEnd;
-
+    public Text BestScore;
     
+    public Text CoinsStart;
+    public Text QuantityCoinsPerGame;
+    public Text QuantityCoinsPerGameEnd;
 
-    
-    
-
-    public bool gameIsStarted;
-    public bool gameIsPaused;
-    public bool gameIsOver;
-
-
-    public void Save(int coinsCount)
+    public void Save()
     {
-        PlayerPrefs.SetInt("Coins", PlayerPrefs.GetInt("Coins") + coinsCount);
+        PlayerPrefs.SetInt("Coins", PlayerPrefs.GetInt("Coins") + GameManager.instance.CoinScore);
+        
+        if(PlayerPrefs.GetInt("BestScore") < (int)GameManager.instance.GameScore)
+            PlayerPrefs.SetInt("BestScore", (int)GameManager.instance.GameScore);
+    }
+
+    private void Start()
+    {
+        CoinsStart.text = PlayerPrefs.GetInt("Coins").ToString();
+    }
+
+    private bool GameIsPlay()
+    {
+        return !GameManager.instance.GameIsOver && GameManager.instance.GameIsStarted &&
+               !GameManager.instance.GameIsPaused;
     }
     
+
     private void Update()
     {
         Count.text = ((int)GameManager.instance.GameScore).ToString();
-        CountShdow.text = Count.text;
         
-        
-        if (!GameManager.instance.GameIsOver && GameManager.instance.GameIsStarted && !GameManager.instance.GameIsPaused)
+        if (GameIsPlay())
         {
             Count.text = ((int)GameManager.instance.GameScore).ToString();
-            CountShdow.text = Count.text;
+            QuantityCoinsPerGame.text = GameManager.instance.CoinScore.ToString();
+        }
 
-
+        if (GameIsPlay())
+        {
+            if(Input.GetKeyDown("right"))
+                Turn(true);
+            if(Input.GetKeyDown("left"))
+                Turn(false);
         }
 
         if (GameManager.instance.GameIsOver)
@@ -97,8 +110,12 @@ public class TouchScript : MonoBehaviour
 
     public void GameOver()
     {
+        Save();
         gameOverPanel.SetActive(true);
-
+        BestScore.text = PlayerPrefs.GetInt("BestScore").ToString();
+        CountScoreEnd.text = ((int)GameManager.instance.GameScore).ToString();
+        QuantityCoinsPerGameEnd.text = GameManager.instance.CoinScore.ToString();
+        
     }
     
     public void RestartGame()
